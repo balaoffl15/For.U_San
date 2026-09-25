@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>For San</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Alex+Brush&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Plus+Jakarta+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #FFFFFF;
+            --bg-paper: #FCFAF7;
+            --accent-purple: #6F4A9E;
+            --accent-muted: #A88BC7;
+            --accent-light: #EDE6F5;
+            --text-dark: #17151A;
+            --text-muted: #6F6A73;
+            --font-heading: 'Cormorant Garamond', Georgia, serif;
+            --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
+            --font-script: 'Alex Brush', cursive;
+            --ease-cinematic: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-primary);
+            color: var(--text-dark);
+            font-family: var(--font-body);
+            font-weight: 300;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow: hidden;
+        }
+
+        /* Particles Background Canvas */
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.45;
+            transition: opacity 1.8s ease;
+        }
+
+        /* Tiny Corner Audio Control */
+        .audio-control {
+            position: fixed;
+            top: 1.8rem;
+            right: 1.8rem;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1.2s ease, visibility 1.2s ease;
+        }
+
+        .audio-control.visible {
+            opacity: 0.4;
+            visibility: visible;
+        }
+
+        .audio-control.visible:hover {
+            opacity: 0.9;
+        }
+
+        .audio-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: var(--accent-purple);
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .audio-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+
+        /* Viewport Container & Transitions */
+        .viewport {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .page {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 1.8rem;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 1.4s var(--ease-cinematic), filter 1.4s var(--ease-cinematic), visibility 1.4s var(--ease-cinematic);
+            filter: blur(4px);
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .page.active {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+            filter: blur(0);
+        }
+
+        /* Typography Identity */
+        .script-text {
+            font-family: var(--font-script);
+            color: var(--accent-purple);
+            font-size: clamp(2.2rem, 4.8vw, 3.2rem);
+            font-weight: 400;
+            line-height: 1.25;
+            text-align: center;
+        }
+
+        .heading-serif {
+            font-family: var(--font-heading);
+            font-weight: 300;
+            color: var(--text-dark);
+            font-size: clamp(2.2rem, 5vw, 3.8rem);
+            line-height: 1.28;
+            letter-spacing: -0.01em;
+            text-align: center;
+        }
+
+        .uppercase-label {
+            font-size: 0.68rem;
+            letter-spacing: 0.32em;
+            text-transform: uppercase;
+            color: var(--accent-purple);
+            margin-bottom: 2rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .body-editorial {
+            font-size: clamp(1rem, 1.8vw, 1.2rem);
+            color: var(--text-muted);
+            line-height: 1.85;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        /* Pure Refined Fade Animation Language */
+        .fade-el {
+            opacity: 0;
+            filter: blur(5px);
+            transition: opacity 1.5s var(--ease-cinematic), filter 1.5s var(--ease-cinematic);
+            will-change: opacity, filter;
+        }
+
+        .fade-el.visible {
+            opacity: 1;
+            filter: blur(0);
+        }
+
+        /* Navigation Button */
+        .btn-continue {
+            margin-top: 3.5rem;
+            background: none;
+            border: none;
+            font-family: var(--font-heading);
+            font-size: 1.15rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            padding: 0.5rem 0.2rem;
+            position: relative;
+            text-decoration: none;
+            transition: color 0.5s ease;
+            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            opacity: 0;
+            filter: blur(4px);
+        }
+
+        .btn-continue.visible {
+            opacity: 1;
+            filter: blur(0);
+            transition: opacity 1.5s var(--ease-cinematic), filter 1.5s var(--ease-cinematic);
+        }
+
+        .btn-continue::after {
+            content: '';
+            position: absolute;
+            bottom: 2px;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background-color: var(--accent-purple);
+            transform: scaleX(0);
+            transform-origin: left center;
+            transition: transform 1.2s var(--ease-cinematic);
+        }
+
+        .btn-continue.visible::after {
+            transform: scaleX(1);
+        }
+
+        .btn-continue:hover {
+            color: var(--accent-purple);
+        }
+
+        /* PAGE 4 EDITORIAL STORY */
+        .story-container {
+            max-width: 580px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 2.2rem;
+            margin: 1.5rem 0;
+        }
+
+        .story-chapter {
+            position: relative;
+            text-align: center;
+        }
+
+        .story-chapter:not(:last-child)::after {
+            content: '';
+            display: block;
+            width: 20px;
+            height: 1px;
+            background-color: var(--accent-light);
+            margin: 2.2rem auto 0 auto;
+        }
+
+        .chapter-label {
+            font-size: 0.65rem;
+            letter-spacing: 0.28em;
+            text-transform: uppercase;
+            color: var(--accent-muted);
+            margin-bottom: 0.4rem;
+        }
+
+        .chapter-text {
+            font-family: var(--font-heading);
+            font-size: 1.3rem;
+            color: var(--text-dark);
+            line-height: 1.6;
+        }
+
+        /* PAGE 5 MEMORIES */
+        .memories-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.6rem;
+            max-width: 580px;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .memory-line {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            color: var(--text-dark);
+            font-weight: 300;
+        }
+
+        /* PAGE 7 WISHES */
+        .wishes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            text-align: center;
+            max-width: 520px;
+            margin: 2rem 0 1rem 0;
+        }
+
+        .wish-item {
+            font-family: var(--font-heading);
+            font-size: 1.25rem;
+            color: var(--text-muted);
+        }
+
+        .wish-focus {
+            font-family: var(--font-heading);
+            font-size: clamp(1.3rem, 2.8vw, 1.6rem);
+            color: var(--text-dark);
+            margin-top: 1.5rem;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 6px;
+        }
+
+        .wish-focus-line {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%) scaleX(0);
+            width: 80%;
+            height: 1px;
+            background-color: var(--accent-purple);
+            transition: transform 1.5s var(--ease-cinematic);
+        }
+
+        .wish-focus-line.visible {
+            transform: translateX(-50%) scaleX(1);
+        }
+
+        /* PAGE 9 ENVELOPE */
+        .envelope-scene {
+            position: relative;
+            width: 320px;
+            height: 220px;
+            margin: 2.2rem 0 1.2rem 0;
+            cursor: pointer;
+            perspective: 1200px;
+        }
+
+        .envelope-base {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-paper);
+            border: 1px solid #EFEAE3;
+            box-shadow: 0 15px 40px rgba(23, 21, 26, 0.05);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .envelope-pocket {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 160px solid #F6F2EB;
+            border-right: 160px solid #F6F2EB;
+            border-bottom: 110px solid #ECE6DC;
+            border-top: 110px solid transparent;
+            z-index: 3;
+        }
+
+        .envelope-lining {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-light);
+            opacity: 0.4;
+            z-index: 1;
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 120px solid #E4DDD1;
+            transform-origin: top center;
+            transition: transform 2s var(--ease-cinematic);
+            z-index: 4;
+        }
+
+        .envelope-seal {
+            position: absolute;
+            top: 98px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 44px;
+            height: 44px;
+            background-color: var(--accent-purple);
+            border-radius: 50%;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 1.1rem;
+            box-shadow: 0 4px 15px rgba(111, 74, 158, 0.3);
+            transition: opacity 1s ease, transform 1s ease, filter 0.8s ease;
+        }
+
+        .envelope-letter-preview {
+            position: absolute;
+            bottom: 12px;
+            left: 20px;
+            right: 20px;
+            height: 180px;
+            background: #FFFFFF;
+            border: 1px solid #ECE7E0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            z-index: 2;
+            transition: transform 2.2s var(--ease-cinematic);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Envelope Opening Sequence */
+        .envelope-scene.opening .envelope-seal {
+            filter: brightness(1.2);
+            transform: translateX(-50%) scale(0.6);
+            opacity: 0;
+        }
+
+        .envelope-scene.opening .envelope-flap {
+            transform: rotateX(180deg);
+            z-index: 1;
+        }
+
+        .envelope-scene.opening .envelope-letter-preview {
+            transform: translateY(-130px);
+            z-index: 3;
+        }
+
+        /* PAGE 10 SINGLE CONTINUOUS LETTER */
+        .letter-container {
+            max-width: 660px;
+            width: 100%;
+            margin: auto;
+            background: var(--bg-paper);
+            padding: 4rem 3rem;
+            border: 1px solid #F0ECE4;
+            box-shadow: 0 15px 45px rgba(23, 21, 26, 0.03);
+            border-radius: 3px;
+        }
+
+        .letter-heading {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 400;
+            color: var(--text-dark);
+            margin-bottom: 2.5rem;
+            text-align: center;
+        }
+
+        .letter-body-wrapper {
+            opacity: 0;
+            filter: blur(4px);
+            transition: opacity 2s var(--ease-cinematic), filter 2s var(--ease-cinematic);
+        }
+
+        .letter-body-wrapper.visible {
+            opacity: 1;
+            filter: blur(0);
+        }
+
+        .letter-p {
+            font-family: var(--font-heading);
+            font-size: clamp(1.15rem, 2vw, 1.28rem);
+            line-height: 1.9;
+            color: #2D2A32;
+            font-weight: 300;
+            margin-bottom: 1.8rem;
+            text-align: justify;
+            text-justify: inter-word;
+        }
+
+        .letter-p.thanks-line {
+            text-align: left;
+            margin-bottom: 0.5rem;
+        }
+
+        /* PAGE 11 FINAL IMPACT PAGE */
+        .final-quote-container {
+            max-width: 640px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .quote-char-span {
+            display: inline-block;
+            opacity: 0;
+            filter: blur(4px);
+            transition: opacity 1.2s ease, filter 1.2s ease;
+            font-family: var(--font-heading);
+            font-size: clamp(1.35rem, 3vw, 1.9rem);
+            line-height: 1.75;
+            color: var(--text-dark);
+            font-weight: 300;
+        }
+
+        .quote-char-span.visible {
+            opacity: 1;
+            filter: blur(0);
+        }
+
+        .final-signature-block {
+            margin-top: 4.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .author-signature {
+            font-family: var(--font-heading);
+            font-size: clamp(2.2rem, 5vw, 3.2rem);
+            color: var(--accent-purple);
+            font-weight: 400;
+            letter-spacing: 0.04em;
+            opacity: 0;
+            filter: blur(6px);
+            transform: scale(0.98);
+            transition: opacity 2.2s var(--ease-cinematic), filter 2.2s var(--ease-cinematic), transform 2.2s var(--ease-cinematic);
+        }
+
+        .author-signature.visible {
+            opacity: 1;
+            filter: blur(0);
+            transform: scale(1);
+        }
+
+        .final-purple-line {
+            width: 50px;
+            height: 1px;
+            background-color: var(--accent-purple);
+            opacity: 0;
+            transform: scaleX(0);
+            transition: opacity 1.8s ease, transform 1.8s var(--ease-cinematic);
+            margin-top: 0.6rem;
+        }
+
+        .final-purple-line.visible {
+            opacity: 0.7;
+            transform: scaleX(1);
+        }
+
+        /* Mobile Responsive Adjustments */
+        @media (max-width: 600px) {
+            .page { padding: 2.5rem 1.2rem; }
+            .letter-container { padding: 2.5rem 1.4rem; }
+            .letter-p { text-align: left; }
+            .envelope-scene { transform: scale(0.88); }
+            .story-container { gap: 1.8rem; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * { transition-duration: 0.01s !important; animation-duration: 0.01s !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Atmospheric Particles Canvas -->
+    <canvas id="particleCanvas"></canvas>
+
+    <!-- Corner Audio Control -->
+    <div class="audio-control" id="audioControl">
+        <button class="audio-btn" id="audioToggleBtn" aria-label="Toggle Audio">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+            </svg>
+        </button>
+    </div>
+
+    <!-- Background Audio Element -->
+    <audio id="bgAudio" loop preload="auto"></audio>
+
+    <main class="viewport">
+
+        <!-- PAGE 1: THE INVITATION -->
+        <section class="page active" id="page-1">
+            <div id="p1-el1" class="script-text fade-el" style="margin-bottom: 1.2rem;">For someone special...</div>
+            <h1 id="p1-el2" class="heading-serif fade-el" style="font-size: clamp(3rem, 7vw, 4.8rem);">Hey San</h1>
+            <div id="p1-el3" class="fade-el" style="margin: 1.4rem 0; color: var(--accent-purple); font-size: 1rem;">❤️</div>
+            <p id="p1-el4" class="body-editorial fade-el">I made something for you.</p>
+            <button id="p1-btn" class="btn-continue" onclick="nextPage(2)">Continue →</button>
+        </section>
+
+        <!-- PAGE 2: BIRTHDAY REVEAL -->
+        <section class="page" id="page-2">
+            <div id="p2-el1" class="uppercase-label fade-el">FOR SAN</div>
+            <h2 id="p2-el2" class="heading-serif fade-el">Happiest Birthday, San</h2>
+            <div id="p2-el3" class="fade-el" style="margin: 1.2rem 0; font-size: 1.3rem;">🌻</div>
+            <p id="p2-el4" class="body-editorial fade-el" style="margin-bottom: 1.2rem;">Today is a little more special because it belongs to you.</p>
+            <div id="p2-el5" class="script-text fade-el" style="font-size: clamp(1.8rem, 4vw, 2.5rem);">And I wanted to make something just for you.</div>
+            <button id="p2-btn" class="btn-continue" onclick="nextPage(3)">Continue →</button>
+        </section>
+
+        <!-- PAGE 3: A FEW THINGS ABOUT YOU -->
+        <section class="page" id="page-3">
+            <div id="p3-el1" class="uppercase-label fade-el">A FEW THINGS ABOUT YOU</div>
+            <div style="display: flex; flex-direction: column; gap: 2rem; align-items: center; margin: 1.5rem 0;">
+                <div id="p3-el2" class="heading-serif fade-el" style="font-size: clamp(1.8rem, 3.8vw, 2.6rem);">You listen.</div>
+                <div id="p3-el3" class="heading-serif fade-el" style="font-size: clamp(1.8rem, 3.8vw, 2.6rem);">You care.</div>
+                <div id="p3-el4" class="heading-serif fade-el" style="font-size: clamp(1.8rem, 3.8vw, 2.6rem);">
+                    You make difficult days feel a little <span style="color: var(--accent-purple);">lighter</span>.
+                </div>
+                <div id="p3-el5" class="heading-serif fade-el" style="font-size: clamp(1.8rem, 3.8vw, 2.6rem);">
+                    And somehow, you make ordinary moments memorable.
+                </div>
+            </div>
+            <button id="p3-btn" class="btn-continue" onclick="nextPage(4)">Continue →</button>
+        </section>
+
+        <!-- PAGE 4: OUR LITTLE STORY -->
+        <section class="page" id="page-4">
+            <div id="p4-el1" class="uppercase-label fade-el">OUR LITTLE STORY</div>
+            <h2 id="p4-el2" class="heading-serif fade-el" style="margin-bottom: 2.2rem;">Somewhere along the way...</h2>
+            
+            <div class="story-container">
+                <div class="story-chapter">
+                    <div id="p4-c1-lbl" class="chapter-label fade-el">THE BEGINNING</div>
+                    <div id="p4-
